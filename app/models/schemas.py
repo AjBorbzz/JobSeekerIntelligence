@@ -11,6 +11,7 @@ class WorkType(str, Enum):
     CONTRACT = "contract"
     UNKNOWN = "unknown"
 
+# Data supplied by the user.
 class JobCreate(BaseModel):
     title: str = Field(min_length=2, max_length=200)
     source_url: str | None = None
@@ -21,7 +22,7 @@ class JobCreate(BaseModel):
     date_updated: date | None = None 
     job_overview: str = Field(min_length=20,)
 
+# Job stored inside our application
 class Job(JobCreate):
     id: UUID
     created_at: datetime
-    
