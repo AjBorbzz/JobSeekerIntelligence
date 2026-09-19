@@ -18,6 +18,7 @@ class OllamaClient:
         messages.append({"role": "user", "content": prompt,})
 
         response = self.client.chat(model=self.model, messages=messages,)
+        return response.message.content
 
     def generate_structured(self, prompt: str, schema: type[T], system_prompt: str | None = None) -> T:
         messages= []
