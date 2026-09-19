@@ -64,3 +64,13 @@ class JobAnalysis(BaseModel):
     business_problem: str | None = None
     expected_deliverables: list[str] = Field(default_factory=list,)
     evidence: list[AnalysisEvidence] = Field(default_factory=list,)
+
+class SemanticRelevanceRequest(BaseModel):
+    query: str = Field(min_length=2, max_length=300,)
+
+class SemanticRelevance(BaseModel):
+    job_id: UUID
+    query: str 
+    embedding_model: str 
+    cosine_similarity: float = Field(ge=-1.0,le=1.0)
+    semantic_score: float = Field(ge=0.0, le=100.0,)
