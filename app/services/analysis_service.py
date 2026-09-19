@@ -6,7 +6,6 @@ from app.models.schemas import (
     JobAnalysis,
 )
 
-
 class AnalysisService:
     def __init__(self, analyzer: JobAnalyzer | None = None,):
         self.analyzer = analyzer or JobAnalyzer()

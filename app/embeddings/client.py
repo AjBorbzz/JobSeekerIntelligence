@@ -24,7 +24,7 @@ class EmbeddingClient:
         if not cleaned:
             raise ValueError("Cannot generate embeddings for an empty input list.")
 
-        response = self.client.model(model=self.model, input=cleaned,)
+        response = self.client.embed(model=self.model, input=cleaned,)
 
         return response.embeddings
 
