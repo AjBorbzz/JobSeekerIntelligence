@@ -1,7 +1,11 @@
 from uuid import UUID 
 
 from app.llm.job_analyzer import JobAnalyzer 
-from app.models.schemas import Job, JobAnalysis 
+from app.models.schemas import (
+    Job, 
+    JobAnalysis,
+)
+
 
 class AnalysisService:
     def __init__(self, analyzer: JobAnalyzer | None = None,):
