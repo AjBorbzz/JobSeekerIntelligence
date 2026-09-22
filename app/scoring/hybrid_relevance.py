@@ -125,3 +125,13 @@ def constraint_score(criteria: SearchCriteria, job: Job) -> tuple[float | None, 
         return None, []
 
     return round(sum(checks) / len(checks), 2), notes
+
+
+def weighted_score(components: list[tuple[float, float]]) -> float:
+    if not components:
+        return 0.0 
+
+    weighted_sum = sum(score * weight for score, weight in components)
+    active_weight = sum(weight for _, weight in components)
+
+    return round(weighted_sum / active_weight, 2)
