@@ -7,6 +7,8 @@ from app.models.schemas import (
     JobCreate,
     SemanticRelevance,
     SemanticRelevanceRequest,
+    HybridRelevance, 
+    SearchCriteria
 )
 
 from app.services.job_service import job_service
@@ -14,6 +16,8 @@ from app.services.analysis_service import analysis_service
 from app.services.relevance_service import (
     relevance_service,
 )
+
+from app.services.hybrid_relevance_service import hybrid_relevance_service
 
 router = APIRouter(prefix="/jobs", tags=["jobs"],)
 
@@ -67,3 +71,27 @@ def calculate_semantic_relevance(job_id: UUID, request: SemanticRelevanceRequest
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job must be analyzed before semantic relevance can be calculated.")
 
     return relevance_service.calculate_semantic_relevance(query=request.query, job=job, analysis=analysis,)
+
+@router.post("/{job_id}/relevance", response_model=HybridRelevance)
+def calculate_job_relevance(job_id: UUID, criteria: SearchCriteria) -> HybridRelevance:
+    job = job_service.get_job(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    analysis = analysis_service.get_analysis(job_id)
+
+    if analysis is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job must be analyzed before relevance can be calculated",
+        )
+
+    return hybrid_relevance_service.calculate(
+        criteria=criteria,
+        job=job,
+        analysis=analysis,
+    )
