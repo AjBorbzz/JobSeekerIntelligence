@@ -85,3 +85,43 @@ def skill_match_score(criteria: SearchCriteria, analysis: JobAnalysis) -> tuple[
         "matched_preferred": matched_preferred,
         "missing_preferred": missing_preferred
     }
+
+def constraint_score(criteria: SearchCriteria, job: Job) -> tuple[float | None, list[str]]:
+    checks: list[float] = []
+    notes: list[str] = []
+
+    if criteria.work_types:
+        if job.type_of_work in criteria.work_types:
+            checks.append(100.0)
+            notes.append(f"Work type matches: {job.type_of_work.value}.")
+
+        elif job.type_of_work.value == "unknown":
+            checks.append(50.0)
+            notes.append("Job work type is unknown.")
+
+        else:
+            checks.append(0.0)
+            notes.append(f"Work type does not match: {job.type_of_work.value}.")
+
+    if criteria.max_hours_per_week is not None:
+        if job.hours_per_week is None:
+            checks.append(50.0)
+            notes.append("Hours per week were not provided.")
+        elif job.hours_per_week <= criteria.max_hours_per_week:
+            checks.append(100.0)
+            notes.append(
+                f"Hours requirement matches: {job.hours_per_week:g} <="
+                f"{criteria.max_hours_per_week:g}." 
+            )
+
+        else:
+            checks.append(0.0)
+            notes.append(
+                f"Hours exceed requested maximum : {job.hours_per_week:g}"
+                f"{criteria.max_hours_per_week:g}"
+            )
+
+    if not checks:
+        return None, []
+
+    return round(sum(checks) / len(checks), 2), notes
