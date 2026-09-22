@@ -46,10 +46,12 @@ class EvidenceCategory(str, Enum):
     SENIORITY = "seniority"
     BUSINESS_PROBLEM = "business_problem"
 
+
 class AnalysisEvidence(BaseModel):
     category: EvidenceCategory
     claim: str = Field(min_length=2, max_length=300)
     source_text: str = Field(min_length=2, max_length=500)
+
 
 class JobAnalysis(BaseModel):
     job_id: UUID
@@ -65,8 +67,10 @@ class JobAnalysis(BaseModel):
     expected_deliverables: list[str] = Field(default_factory=list,)
     evidence: list[AnalysisEvidence] = Field(default_factory=list,)
 
+
 class SemanticRelevanceRequest(BaseModel):
     query: str = Field(min_length=2, max_length=300,)
+
 
 class SemanticRelevance(BaseModel):
     job_id: UUID
@@ -74,3 +78,33 @@ class SemanticRelevance(BaseModel):
     embedding_model: str 
     cosine_similarity: float = Field(ge=-1.0,le=1.0)
     semantic_score: float = Field(ge=0.0, le=100.0,)
+
+
+class SearchCriteria(BaseModel):
+    query: str = Field(min_length=2, max_length=300)
+    required_skills: list[str] = Field(default_factory=list)
+    preferred_skills: list[str] = Field(default_factory=list)
+    work_types: list[WorkType] = Field(default_factory=list)
+    max_hours_per_week: float | None = Field(default=None, ge=1, le=168)
+
+
+class RelevanceComponent(BaseModel):
+    name: str 
+    score: float = Field(ge=0.0, le=100.0)
+    weight: float = Field(gt=0.0, le=-1.0)
+    details: list[str] = Field(default_factory=list)
+
+
+class HybridRelevance(BaseModel):
+    job_id: UUID
+    query: str
+    overall_score: float = Field(ge=0.0, le=100.0)
+    components: list[RelevanceComponent]
+
+    matched_required_skills: list[str] = Field(default_factory=list)
+    missing_required_skills: list[str] = Field(default_factory=list)
+
+    matched_preferred_skills: list[str] = Field(default_factory=list)
+    missing_preferred_skills: list[str] = Field(default_factory=list)
+
+    constraint_notes: list[str] = Field(default_factory=list)
