@@ -53,20 +53,25 @@ class AnalysisEvidence(BaseModel):
     source_text: str = Field(min_length=2, max_length=500)
 
 
-class JobAnalysis(BaseModel):
-    job_id: UUID
-    role_category: str 
-    role_summary: str 
+class JobAnalysisData(BaseModel):
+    role_category: str
+    role_summary: str
     seniority: SeniorityLevel = SeniorityLevel.UNKNOWN
-    required_skills: list[str] = Field(default_factory=list,)
-    preferred_skills: list[str] = Field(default_factory=list,)
-    tech_stack: list[str] = Field(default_factory=list,)
-    responsibilities: list[str] = Field(default_factory=list,)
-    employer_pain_points: list[str] = Field(default_factory=list,)
-    business_problem: str | None = None
-    expected_deliverables: list[str] = Field(default_factory=list,)
-    evidence: list[AnalysisEvidence] = Field(default_factory=list,)
 
+    required_skills: list[str] = Field(default_factory=list)
+    preferred_skills: list[str] = Field(default_factory=list)
+    tech_stack: list[str] = Field(default_factory=list)
+    responsibilities: list[str] = Field(default_factory=list)
+    employer_pain_points: list[str] = Field(default_factory=list)
+
+    business_problem: str | None = None
+
+    expected_deliverables: list[str] = Field(default_factory=list)
+    evidence: list[AnalysisEvidence] = Field(default_factory=list)
+
+
+class JobAnalysis(JobAnalysisData):
+    job_id: UUID
 
 class SemanticRelevanceRequest(BaseModel):
     query: str = Field(min_length=2, max_length=300,)
