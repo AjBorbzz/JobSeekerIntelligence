@@ -108,3 +108,64 @@ class HybridRelevance(BaseModel):
     missing_preferred_skills: list[str] = Field(default_factory=list)
 
     constraint_notes: list[str] = Field(default_factory=list)
+
+class POCComplexity(str, Enum):
+    MINI = "mini"
+    SMALL = "small"
+    MEDIUM = "medium"
+
+
+class POCFeature(BaseModel):
+    name: str
+    description: str
+    job_relevance: str
+
+
+class POCArchitectureComponent(BaseModel):
+    name: str
+    responsibility: str
+    technologies: list[str] = Field(default_factory=list)
+
+
+class POCImplementationStep(BaseModel):
+    order: int = Field(ge=1)
+    title: str
+    description: str
+
+
+class POCAlignment(BaseModel):
+    job_requirement: str
+    project_evidence: str
+
+
+class POCProposalData(BaseModel):
+    project_name: str
+    objective: str
+    problem_statement: str
+    why_relevant: str
+
+    tech_stack: list[str] = Field(default_factory=list)
+    features: list[POCFeature] = Field(default_factory=list)
+    architecture: list[POCArchitectureComponent] = Field(default_factory=list)
+    data_flow: list[str] = Field(default_factory=list)
+
+    implementation_steps: list[POCImplementationStep] = Field(default_factory=list)
+    alignment: list[POCAlignment] = Field(default_factory=list)
+
+    demo_scenario: str
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    out_of_scope: list[str] = Field(default_factory=list)
+
+    complexity: POCComplexity
+
+
+class POCProposal(POCProposalData):
+    job_id: UUID
+    search_query: str
+    job_relevance_score: float = Field(ge=0.0, le=100.0)
+    generated_by: str
+
+
+class POCGenerationRequest(BaseModel):
+    criteria: SearchCriteria
+    max_complexity: POCComplexity = POCComplexity.SMALL
