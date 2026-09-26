@@ -19,6 +19,9 @@ from app.services.relevance_service import (
 
 from app.services.hybrid_relevance_service import hybrid_relevance_service
 
+from app.models.schemas import POCGenerationRequest, POCProposal
+from app.services.poc_service import poc_service
+
 router = APIRouter(prefix="/jobs", tags=["jobs"],)
 
 @router.post("/manual", response_model=Job, status_code=status.HTTP_201_CREATED,)
@@ -95,3 +98,48 @@ def calculate_job_relevance(job_id: UUID, criteria: SearchCriteria) -> HybridRel
         job=job,
         analysis=analysis,
     )
+
+@router.post("/{job_id}/poc", response_model=POCProposal)
+def generate_poc(job_id: UUID, request: POCGenerationRequest) -> POCProposal:
+    job = job_service.get_job(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    analysis = analysis_service.get_analysis(job_id)
+
+    if analysis is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job must be analyzed before a POC can be generated",
+        )
+
+    return poc_service.generate(
+        job=job,
+        analysis=analysis,
+        request=request,
+    )
+
+
+@router.get("/{job_id}/poc", response_model=POCProposal)
+def get_poc(job_id: UUID) -> POCProposal:
+    job = job_service.get_job(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    proposal = poc_service.get(job_id)
+
+    if proposal is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="POC has not been generated",
+        )
+
+    return proposal
