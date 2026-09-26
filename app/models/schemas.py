@@ -91,7 +91,7 @@ class SearchCriteria(BaseModel):
 class RelevanceComponent(BaseModel):
     name: str 
     score: float = Field(ge=0.0, le=100.0)
-    weight: float = Field(gt=0.0, le=-1.0)
+    weight: float = Field(gt=0.0, le=1.0)
     details: list[str] = Field(default_factory=list)
 
 
