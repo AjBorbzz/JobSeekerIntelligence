@@ -34,50 +34,47 @@ class JobAnalyzer:
 
     def analyze(self,job: Job,) -> JobAnalysis:
         prompt = f"""
-                    Analyze the following job advertisement.
+                Analyze the following job advertisement.
 
-                    JOB ID:
-                    {job.id}
+                JOB TITLE:
+                {job.title}
 
-                    JOB TITLE:
-                    {job.title}
+                COMPANY:
+                {job.company or "Not provided"}
 
-                    COMPANY:
-                    {job.company or "Not provided"}
+                TYPE OF WORK:
+                {job.type_of_work.value}
 
-                    TYPE OF WORK:
-                    {job.type_of_work.value}
+                HOURS PER WEEK:
+                {job.hours_per_week or "Not provided"}
 
-                    HOURS PER WEEK:
-                    {job.hours_per_week or "Not provided"}
+                SALARY:
+                {job.salary or "Not provided"}
 
-                    SALARY:
-                    {job.salary or "Not provided"}
+                JOB OVERVIEW:
+                ---
+                {job.job_overview}
+                ---
 
-                    JOB OVERVIEW:
-                    ---
-                    {job.job_overview}
-                    ---
+                Identify:
 
-                    Identify:
+                - actual role category
+                - concise role summary
+                - seniority
+                - required skills
+                - preferred skills
+                - technologies explicitly mentioned
+                - responsibilities
+                - employer pain points
+                - underlying business problem
+                - expected deliverables
 
-                    - actual role category
-                    - concise role summary
-                    - seniority
-                    - required skills
-                    - preferred skills
-                    - technologies explicitly mentioned
-                    - responsibilities
-                    - employer pain points
-                    - underlying business problem
-                    - expected deliverables
+                For every important interpretation, provide evidence using text copied
+                directly from the job overview.
 
-                    For every important interpretation, provide evidence using text copied
-                    directly from the job overview.
-
-                    Do not add skills or technologies merely because they are normally
-                    associated with this job title.
-                    """
+                Do not add skills or technologies merely because they are normally
+                associated with this job title.
+                """
 
         analysis_data = self.client.generate_structured(
                                         prompt=prompt,
