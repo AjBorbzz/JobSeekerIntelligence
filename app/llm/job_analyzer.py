@@ -1,5 +1,6 @@
+
 from app.llm.client import OllamaClient
-from app.models.schemas import Job, JobAnalysis
+from app.models.schemas import Job, JobAnalysis, JobAnalysisData
 
 
 SYSTEM_PROMPT = """
@@ -78,7 +79,13 @@ class JobAnalyzer:
                     associated with this job title.
                     """
 
-        return self.client.generate_structured(prompt=prompt,
-            schema=JobAnalysis,
-            system_prompt=SYSTEM_PROMPT,
+        analysis_data = self.client.generate_structured(
+                                        prompt=prompt,
+                                        schema=JobAnalysisData,
+                                        system_prompt=SYSTEM_PROMPT,
+)
+
+        return JobAnalysis(
+            job_id=job.id,
+            **analysis_data.model_dump(),
         )
