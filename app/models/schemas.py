@@ -174,3 +174,69 @@ class POCProposal(POCProposalData):
 class POCGenerationRequest(BaseModel):
     criteria: SearchCriteria
     max_complexity: POCComplexity = POCComplexity.SMALL
+
+class POCRequirementType(str, Enum):
+    REQUIRED_SKILL = "required_skill"
+    RESPONSIBILITY = "responsibility"
+    PAIN_POINT = "pain_point"
+    DELIVERABLE = "deliverable"
+    BUSINESS_PROBLEM = "business_problem"
+
+
+class POCCoverageStatus(str, Enum):
+    COVERED = "covered"
+    PARTIAL = "partial"
+    MISSING = "missing"
+
+
+class POCRequirement(BaseModel):
+    id: str
+    requirement_type: POCRequirementType
+    text: str
+
+
+class POCRequirementEvaluation(BaseModel):
+    requirement_id: str
+    status: POCCoverageStatus
+    project_evidence: list[str] = Field(default_factory=list)
+    explanation: str
+
+
+class POCEvaluationData(BaseModel):
+    requirement_evaluations: list[POCRequirementEvaluation] = Field(default_factory=list)
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    unnecessary_complexity: list[str] = Field(default_factory=list)
+    summary: str
+
+
+class POCCoverageComponent(BaseModel):
+    requirement_type: POCRequirementType
+    score: float = Field(ge=0.0, le=100.0)
+    weight: float = Field(gt=0.0, le=1.0)
+    covered: int = Field(ge=0)
+    partial: int = Field(ge=0)
+    missing: int = Field(ge=0)
+
+
+class POCEvaluation(BaseModel):
+    job_id: UUID
+    project_name: str
+    evaluated_by: str
+
+    requirement_coverage_score: float = Field(ge=0.0, le=100.0)
+    explicit_skill_coverage_score: float | None = Field(default=None, ge=0.0, le=100.0)
+    poc_relevance_score: float = Field(ge=0.0, le=100.0)
+
+    coverage_components: list[POCCoverageComponent] = Field(default_factory=list)
+
+    matched_required_skills: list[str] = Field(default_factory=list)
+    missing_required_skills: list[str] = Field(default_factory=list)
+
+    requirement_evaluations: list[POCRequirementEvaluation] = Field(default_factory=list)
+
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    unnecessary_complexity: list[str] = Field(default_factory=list)
+
+    summary: str
