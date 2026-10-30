@@ -1,2 +1,6 @@
 .venv/
 scratch
+
+# Python-generated files
+__pycache__/
+*.py[cod]
