@@ -18,7 +18,7 @@ class JobRepository:
         values.update(
             id=str(job.id),
             created_at=job.created_at.isoformat(),
-            type_of_work=job.type_of_work.values,
+            type_of_work=job.type_of_work.value,
         )
 
         with self.session_factory.begin() as session:
