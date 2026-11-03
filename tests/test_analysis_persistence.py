@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from app.db.database import Base, create_sqlite_engine
 from app.db.models import AnalysisRecord
 from app.models.schemas import JobAnalysis, JobCreate
-from app.repositories.analysis_repository import AnalysisRepository
+from app.repositories.analysis_repositories import AnalysisRepository
 from app.repositories.job_repository import JobRepository
 from app.services.analysis_service import AnalysisService
 from app.services.job_service import JobService

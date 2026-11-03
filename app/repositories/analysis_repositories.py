@@ -27,7 +27,7 @@ class AnalysisRepository:
 
         statement = statement.on_conflict_do_update(
             index_elements=[AnalysisRecord.job_id],
-            set={
+            set_={
                 "payload": statement.excluded.payload,
                 "saved_at": statement.excluded.saved_at,
                 "schema_version": statement.excluded.schema_version,
