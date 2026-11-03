@@ -34,4 +34,18 @@ class AnalysisRepository:
             session.execute(statement)
 
         return analysis
+
+    def get(self, job_id: UUID) -> JobAnalysis | None:
+        with self.session_factory() as session:
+            record = session.get(AnalysisRecord, str(job_id))
+            if record is None:
+                return None
+            if record.schema_version != 1:
+                raise ValueError("Unsupported stored analysis schema version")
+
+            analysis = JobAnalysis.model_validate(record.payload)
+            if analysis.job_id != job_id:
+                raise ValueError("Stored analysis job_id does not match its database key")
+
+            return analysis
         
