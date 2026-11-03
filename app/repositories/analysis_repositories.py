@@ -16,6 +16,10 @@ class AnalysisRepository:
     def save(self, analysis: JobAnalysis) -> JobAnalysis:
         statement = insert(AnalysisRecord).values(
             job_id = str(analysis.job_id),
+            
+            # model_dump(mode="json") produces a dictionary with JSON-compatible values, 
+            # including serialized UUIDs, enums, lists, and nested evidence.
+            # Store that dictionary in the JSON column.
             payload = analysis.model_dump(mode="json"),
             saved_at = datetime.now(timezone.utc).isoformat(),
             schema_version=1,
@@ -43,6 +47,9 @@ class AnalysisRepository:
             if record.schema_version != 1:
                 raise ValueError("Unsupported stored analysis schema version")
 
+            # reconstructs the typed object.
+            # The repository also checks the storage version and 
+            # the relationship between the payload's job ID and its database key.
             analysis = JobAnalysis.model_validate(record.payload)
             if analysis.job_id != job_id:
                 raise ValueError("Stored analysis job_id does not match its database key")
