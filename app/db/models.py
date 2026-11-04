@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import Date, Float, String, Text
+from sqlalchemy import Date, Float, String, Text, Index, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import JSON, ForeignKey, Integer
 
@@ -29,5 +29,22 @@ class AnalysisRecord(Base):
         String(36), ForeignKey("jobs.id", ondelete="RESTRICT"), primary_key=True,
     )
     payload: Mapped[dict] = mapped_column(JSON)
+    saved_at: Mapped[str] = mapped_column(String(40))
+    schema_version: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class RelevanceRunRecord(Base):
+    __tablename__ = "relevance_runs"
+    __table_args__ = (
+        CheckConstraint("kind IN ('semantic', 'hybrid')", name="ck_relevance_runs_kind"),
+        Index("ix_relevance_runs_job_id_id", "job_id", "id"),
+        {"sqlite_autoincrement": True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(36), ForeignKey("jobs.id", ondelete="RESTRICT"))
+    kind: Mapped[str] = mapped_column(String(8))
+    criteria: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
     saved_at: Mapped[str] = mapped_column(String(40))
     schema_version: Mapped[int] = mapped_column(Integer, default=1)
