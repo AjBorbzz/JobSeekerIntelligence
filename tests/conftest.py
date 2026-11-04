@@ -7,6 +7,7 @@ from app.repositories.job_repository import JobRepository
 from app.services.analysis_service import analysis_service
 from app.services.job_service import job_service
 
+from app.repositories.relevance_repository import relevance_repository
 
 @pytest.fixture
 def job_sessions(tmp_path):
