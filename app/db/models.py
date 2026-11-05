@@ -48,3 +48,18 @@ class RelevanceRunRecord(Base):
     result: Mapped[dict] = mapped_column(JSON)
     saved_at: Mapped[str] = mapped_column(String(40))
     schema_version: Mapped[int] = mapped_column(Integer, default=1)
+
+class POCProposalRecord(Base):
+    __tablename__ = "poc_proposals"
+    __table_args__ = (
+        Index("ix_poc_proposals_job_id_id", "job_id", "id"),
+        {"sqlite_autoincrement": True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(36), ForeignKey("jobs.id", ondelete="RESTRICT"))
+    request: Mapped[dict] = mapped_column(JSON)
+    analysis: Mapped[dict] = mapped_column(JSON)
+    proposal: Mapped[dict] = mapped_column(JSON)
+    saved_at: Mapped[str] = mapped_column(String(40))
+    schema_version: Mapped[int] = mapped_column(Integer, default=1)

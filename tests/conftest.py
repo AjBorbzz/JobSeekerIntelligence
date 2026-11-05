@@ -28,3 +28,7 @@ def isolate_job_storage(job_sessions, monkeypatch):
 @pytest.fixture(autouse=True)
 def isolate_analysis_storage(job_sessions, monkeypatch):
     monkeypatch.setattr(analysis_service, "repository", AnalysisRepository(job_sessions))
+
+@pytest.fixture(autouse=True)
+def isolate_relevance_storage(job_sessions, monkeypatch):
+    monkeypatch.setattr(relevance_repository, "session_factory", job_sessions)
