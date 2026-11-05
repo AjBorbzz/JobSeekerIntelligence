@@ -9,6 +9,9 @@ from app.services.job_service import job_service
 
 from app.repositories.relevance_repository import relevance_repository
 
+from app.repositories.poc_proposal_repository import POCProposalRepository
+from app.services.poc_service import poc_service
+
 @pytest.fixture
 def job_sessions(tmp_path):
     test_engine = create_sqlite_engine(tmp_path / "jobs.db")
@@ -32,3 +35,7 @@ def isolate_analysis_storage(job_sessions, monkeypatch):
 @pytest.fixture(autouse=True)
 def isolate_relevance_storage(job_sessions, monkeypatch):
     monkeypatch.setattr(relevance_repository, "session_factory", job_sessions)
+
+@pytest.fixture(autouse=True)
+def isolate_poc_proposal_storage(job_sessions, monkeypatch):
+    monkeypatch.setattr(poc_service, "repository", POCProposalRepository(job_sessions))
