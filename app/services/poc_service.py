@@ -9,14 +9,16 @@ from app.models.schemas import (
 )
 
 from app.services.hybrid_relevance_service import HybridRelevanceService
+from app.repositories.poc_proposal_repository import POCProposalRepository
 
 class POCService:
-    def __init__(self,
-                 generator: POCGenerator | None = None,
-                 relevance_service: HybridRelevanceService | None = None,):
-        self.generator = generator or POCGenerator()
-        self.relevance_service = relevance_service or HybridRelevanceService()
-        self._proposals: dict[UUID, POCProposal] = {}
+    def __init__(self, generator: POCGenerator | None = None,
+                    relevance_service: HybridRelevanceService | None = None,
+                    repository: POCProposalRepository | None = None,
+                ):
+        self.generator = generator if generator is not None else POCGenerator()
+        self.relevance_service = relevance_service if relevance_service is not None else HybridRelevanceService()
+        self.repository = repository if repository is not None else POCProposalRepository()
 
     def generate(self, job: Job, analysis: JobAnalysis, request: POCGenerationRequest) -> POCProposal:
         relevance = self.relevance_service.calculate(
@@ -41,10 +43,12 @@ class POCService:
             **data.model_dump(),
         )
 
-        self._proposals[job.id] = proposal
+        self.repository.add(job.id, request, analysis, proposal)
         return proposal
 
     def get(self, job_id: UUID) -> POCProposal | None:
-        return self._proposals.get(job_id)
+        snapshot = self.repository.get_latest(job_id)
+        return POCProposal.model_validate(snapshot.proposal) if snapshot is not None else None
 
 poc_service = POCService()
+
