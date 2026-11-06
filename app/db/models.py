@@ -63,3 +63,16 @@ class POCProposalRecord(Base):
     proposal: Mapped[dict] = mapped_column(JSON)
     saved_at: Mapped[str] = mapped_column(String(40))
     schema_version: Mapped[int] = mapped_column(Integer, default=1)
+
+class POCEvaluationRecord(Base):
+    __tablename__ = "poc_evaluations"
+    __table_args__ = (
+        Index("ix_poc_evaluations_proposal_id_id", "proposal_id", "id"),
+        {"sqlite_autoincrement": True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    proposal_id: Mapped[int] = mapped_column(ForeignKey("poc_proposals.id", ondelete="RESTRICT"))
+    evaluation: Mapped[dict] = mapped_column(JSON)
+    saved_at: Mapped[str] = mapped_column(String(40))
+    schema_version: Mapped[int] = mapped_column(Integer, default=1)

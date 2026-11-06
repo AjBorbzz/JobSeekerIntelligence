@@ -5,12 +5,14 @@ from app.models.schemas import (
     Job,
     JobAnalysis,
     JobCreate,
+    POCEvaluation,
     SemanticRelevance,
     SemanticRelevanceRequest,
     HybridRelevance, 
     SearchCriteria
 )
 
+from app.services import poc_evaluation_service
 from app.services.job_service import job_service
 from app.services.analysis_service import analysis_service
 from app.services.relevance_service import (
@@ -159,3 +161,31 @@ def get_relevance_history(
         raise HTTPException(status_code=404, detail="Job not found")
 
     return relevance_repository.list_for_job(job_id, kind=kind, limit=limit, before_id=before_id)
+
+
+@router.post("/{job_id}/poc/evaluate", response_model=POCEvaluation)
+def evaluate_poc(job_id: UUID) -> POCEvaluation:
+    if job_service.get_job(job_id) is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    snapshot = poc_service.repository.get_latest(job_id)
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail="POC has not been generated")
+
+    analysis = JobAnalysis.model_validate(snapshot.analysis)
+    proposal = POCProposal.model_validate(snapshot.proposal)
+    evaluation = POCEvaluation.model_validate(poc_evaluation_service.evaluate(analysis, proposal))
+    poc_evaluation_service.repository.add(job_id, snapshot.id, analysis, evaluation)
+    return evaluation
+
+
+@router.get("/{job_id}/poc/evaluation", response_model=POCEvaluation)
+def get_poc_evaluation(job_id: UUID) -> POCEvaluation:
+    if job_service.get_job(job_id) is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    evaluation = poc_evaluation_service.get(job_id)
+    if evaluation is None:
+        raise HTTPException(status_code=404, detail="Current POC has not been evaluated")
+
+    return evaluation
