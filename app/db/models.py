@@ -76,3 +76,14 @@ class POCEvaluationRecord(Base):
     evaluation: Mapped[dict] = mapped_column(JSON)
     saved_at: Mapped[str] = mapped_column(String(40))
     schema_version: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class ExternalJobIdentity(Base):
+    __tablename__ = "external_job_identities"
+
+    provider: Mapped[str] = mapped_column(String(30), primary_key=True)
+    board_token: Mapped[str] = mapped_column(String(80), primary_key=True)
+    external_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    job_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("jobs.id", ondelete="RESTRICT"), unique=True,
+    )
