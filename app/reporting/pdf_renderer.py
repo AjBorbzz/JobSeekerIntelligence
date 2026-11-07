@@ -72,3 +72,48 @@ def _render(report: ReportSnapshot) -> bytes:
             text = text[end:]
         if not str(value):
             story.append(Paragraph("Not supplied", style))
+
+    def fields(values: dict, depth: int = 0):
+        style = ParagraphStyle(
+            f"depth{depth}", parent=body, leftIndent=min(depth, 3) * 12,
+        )
+        for key, value in values.items():
+            label = key.replace("_", " ").capitalize()
+            if isinstance(value, dict):
+                paragraph(label, heading if depth == 0 else style)
+                fields(value, depth + 1)
+            elif isinstance(value, list):
+                list_heading = ParagraphStyle(f"list{depth}", parent=style, fontName=BOLD, keepWithNext=True)
+                paragraph(label, list_heading)
+                if not value:
+                    paragraph("None recorded", style)
+                for index, item in enumerate(value, 1):
+                    if isinstance(item, dict):
+                        paragraph(f"{label} item {index}", style)
+                        fields(item, depth + 1)
+                    else:
+                        paragraph("- " + str(item), style)
+            else:
+                paragraph("Not supplied" if value is None else value, style, label=label)
+
+    def section(name: str):
+        paragraph(name, heading)
+
+    paragraph("JOB INTELLIGENCE", small)
+    paragraph("Job Intelligence Report", title)
+    paragraph(report.job.title, heading)
+    paragraph("Saved-data export | AI-generated content requires human review.", small)
+    paragraph("Generated at " + report.generated_at.isoformat(), small)
+    paragraph("Job " + str(report.job.id), small)
+    story.append(Spacer(1, 8))
+    job_score = f"{report.proposal.job_relevance_score:.2f} / 100" if report.proposal else "Not recorded"
+    poc_score = f"{report.evaluation.poc_relevance_score:.2f} / 100" if report.evaluation else "Not evaluated"
+    scores = Table([
+        [Paragraph("Job relevance at proposal generation", small), Paragraph("POC relevance for selected proposal", small)],
+        [Paragraph(job_score, heading), Paragraph(poc_score, heading)],
+    ], colWidths=[245, 245])
+    scores.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#EAF3F4")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOX", (0, 0), (-1, -1), 0.5, TEAL),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10), ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+    ]))
