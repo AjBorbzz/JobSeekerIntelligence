@@ -4,7 +4,7 @@ from app.api.jobs import router as jobs_router
 from app.api.job_imports import router as job_import_router
 
 from app.api.job_collection import router as job_collection_router
-
+from app.api.reports import router as reports_router
 
 app = FastAPI(
     title="Job Intelligence",
@@ -15,6 +15,7 @@ app = FastAPI(
 app.include_router(jobs_router)
 app.include_router(job_import_router)
 app.include_router(job_collection_router)
+app.include_router(reports_router)
 
 @app.get("/health")
 def health_check():

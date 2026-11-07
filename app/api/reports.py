@@ -8,9 +8,8 @@ from app.services.report_service import report_service
 
 router = APIRouter(prefix="/jobs", tags=["reports"])
 
-@router.get("/{job_id}/report.pdf", reponse_class=Response, responses{
-    200: {"content": {"applicaton/pdf": {}},
-          "description": "Saved job intelligence PDF"},
+@router.get("/{job_id}/report.pdf", response_class=Response, responses={
+    200: {"content": {"application/pdf": {}}, "description": "Saved job intelligence PDF"},
 })
 def download_report(job_id: UUID, proposal_id: Annotated[int | None, Query(ge=1)] = None) -> Response:
     try:
