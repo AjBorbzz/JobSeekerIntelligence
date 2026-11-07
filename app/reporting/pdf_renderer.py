@@ -117,3 +117,60 @@ def _render(report: ReportSnapshot) -> bytes:
         ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOX", (0, 0), (-1, -1), 0.5, TEAL),
         ("LEFTPADDING", (0, 0), (-1, -1), 10), ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
     ]))
+
+    story.append(scores)
+    section("1. Job facts and source notes")
+    fields(report.job.model_dump(mode="json", exclude={"id"}))
+    section("2. Saved search criteria")
+    fields(report.request.model_dump(mode="json")) if report.request else paragraph("No saved proposal request.")
+    section("3. Analysis")
+    paragraph("Analysis source: " + report.analysis_origin, small)
+    fields(report.analysis.model_dump(mode="json", exclude={"job_id"})) if report.analysis else paragraph("No saved analysis.")
+    section("4. POC proposal")
+    fields(report.proposal.model_dump(mode="json", exclude={"job_id"})) if report.proposal else paragraph("No saved proposal.")
+    section("5. Linked POC evaluation")
+    fields(report.evaluation.model_dump(mode="json", exclude={"job_id"})) if report.evaluation else paragraph(
+        "No saved evaluation for the selected proposal." if report.proposal else "No proposal selected; no evaluation attached."
+    )
+    section("6. Provenance and limitations")
+    fields({
+        "report_layout_version": 1,
+        "proposal_id": report.proposal_id,
+        "proposal_saved_at": report.proposal_saved_at.isoformat() if report.proposal_saved_at else None,
+        "evaluation_id": report.evaluation_id,
+        "evaluation_saved_at": report.evaluation_saved_at.isoformat() if report.evaluation_saved_at else None,
+        "latest_analysis_saved_at": str(report.latest_analysis_saved_at) if report.latest_analysis_saved_at else None,
+    })
+    for note in (
+        "Job facts are the current stored job row, not a reconstructed historical advertisement.",
+        "When a proposal is selected, its saved analysis and request are used; only its linked evaluation is attached.",
+        "The job score is the value saved in the proposal. Independent semantic/hybrid history is not joined without exact input linkage.",
+        "Requirement IDs are displayed as stored. Consult the saved analysis; no missing requirement text is invented.",
+        "Scores are not hiring probabilities. This export does not verify that a vacancy remains open or that AI interpretation is correct.",
+        "No model, embedding, website, external image, or external font is called during export.",
+        "Display policy: peso becomes PHP; unsupported font characters appear as [U+XXXX]; controls are removed and dashes normalized.",
+        "This is not a signed audit record, a complete model/prompt reproduction package, an encrypted PDF, or a redacted public portfolio copy.",
+    ):
+        paragraph(note, small)
+
+    def furniture(canvas, doc):
+        if doc.page > MAX_PAGES:
+            raise ReportTooLarge("Report exceeds the configured page limit")
+        canvas.saveState()
+        canvas.setStrokeColor(TEAL)
+        canvas.line(48, A4[1] - 38, A4[0] - 48, A4[1] - 38)
+        canvas.setFont(FONT, 8)
+        canvas.setFillColor(NAVY)
+        canvas.drawString(48, 27, "Job Intelligence | Saved-data export")
+        canvas.drawRightString(A4[0] - 48, 27, f"Page {doc.page}")
+        canvas.restoreState()
+
+    document = SimpleDocTemplate(
+        output, pagesize=A4, leftMargin=48, rightMargin=48, topMargin=50, bottomMargin=46,
+        title="Job Intelligence Report", author="Job Intelligence", pageCompression=1,
+    )
+    document.build(story, onFirstPage=furniture, onLaterPages=furniture)
+    data = output.getvalue()
+    if len(data) > MAX_PDF_BYTES:
+        raise ReportTooLarge("PDF exceeds the configured output limit")
+    return data
