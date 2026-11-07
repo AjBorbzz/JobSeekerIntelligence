@@ -15,6 +15,9 @@ from app.services.poc_service import poc_service
 from app.repositories.poc_evaluation_repository import POCEvaluationRepository
 from app.services.poc_evaluation_service import poc_evaluation_service
 
+from app.repositories.external_job_repository import ExternalJobRepository
+from app.services.greenhouse_service import greenhouse_service
+
 @pytest.fixture
 def job_sessions(tmp_path):
     test_engine = create_sqlite_engine(tmp_path / "jobs.db")
@@ -46,3 +49,7 @@ def isolate_poc_proposal_storage(job_sessions, monkeypatch):
 @pytest.fixture(autouse=True)
 def isolate_poc_evaluation_storage(job_sessions, monkeypatch):
     monkeypatch.setattr(poc_evaluation_service, "repository", POCEvaluationRepository(job_sessions))
+
+@pytest.fixture(autouse=True)
+def isolate_external_job_storage(job_sessions, monkeypatch):
+    monkeypatch.setattr(greenhouse_service, "repository", ExternalJobRepository(job_sessions))
