@@ -5,7 +5,7 @@ scratch
 __pycache__/
 *.py[cod]
 
-MDs/*
+/MDs/
 
 data/*
 
