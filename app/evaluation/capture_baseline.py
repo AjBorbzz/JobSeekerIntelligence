@@ -10,7 +10,7 @@ from uuid import NAMESPACE_URL, uuid5
 from pydantic import TypeAdapter
 
 from app.evaluation.dataset import (
-    DEFAULT_PATH, EvaluationCase, EvaluationDataset, Slug, load_dataset, normalized, requirement_keys,
+    DEFAULT_PATH, EvaluationCase, EvaluationDataset, Slug, load_dataset, normalized, requirement_keys, Split
 )
 from app.evaluation.score_run import (
     CasePrediction, CoveragePrediction, PredictionRun, dataset_fingerprint, score_run,
@@ -116,8 +116,9 @@ def poc_coverage(
 
 def capture(
     dataset: EvaluationDataset, run_id: str, components: Components, metadata: dict[str, str] | None = None,
-) -> PredictionRun:
+split: Split = "dev") -> PredictionRun:
     run_id = TypeAdapter(Slug).validate_python(run_id)
+    split = TypeAdapter(Split).validate_python(split)
     notes = dict(metadata or {})
     notes.update(
         started_at_utc=datetime.now(timezone.utc).isoformat(),
@@ -137,7 +138,7 @@ def capture(
             return None
 
     for group in dataset.groups:
-        if group.split != "dev":
+        if group.split != split:
             continue
         for case in group.cases:
             job = synthetic_job(dataset.dataset_id, case)
